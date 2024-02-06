@@ -24,56 +24,5 @@ flowchart LR
     end
 ```
 
-Server client communication
-
-## Server (TODO)
-
-- NodeJS application
-- Responsibilites
-  - Sharing rooms with each client
-  - Receiving and broadcasting tactile messages on a per room basis
-
-### Data Structures
-
-- Room Configuration
-- Tacton JSON
-
-## Client (TODO)
-
-<!-- ### Application Information -->
-
-### Software Components
-
-```mermaid
-%% Flowchart describing the basic information flow structure of CollabJam
-flowchart LR
- SRV[Collabjam Server] <--->|Websocket| BE
- TDI[Tactile Displays] <--->|BLE| BE
- subgraph "Collabjam Client (Electron)"
-    direction LR
-    BE[Backend] <-->|IPC| FE[Frontend]
- end
- FE<--->|Web Gamepad API|GP[Gamepad]
-```
-
-#### Electron
-
-##### IPC Messages (Client)
-
-#### Frontend
-
-#### Backend
-
-### Folder Structure
-
-## Firmware (TODO)
-
-## Inter Component Communication (TODO)
-
-### Websocket Communication between Server and Client (Shared Library)
-
-### Tactile Display  (Client - Firmware)
-
-#### BLE Protocol
-
-#### MIDI Implementation
+- [Simple installation guide](doc/INSTALL.md)
+- [Documentation about the code](doc/CODE.md)
