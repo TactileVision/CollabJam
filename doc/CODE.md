@@ -1,10 +1,33 @@
 
 ## Server (TODO)
 
-- NodeJS application
-- Responsibilities
-  - Sharing rooms with each client
-  - Receiving and broadcasting tactile messages on a per room basis
+The Collabjam-Server is a NodeJS application that communicates with Collabjam-Clients through websocket connections. It has two responsibilities, (1) Propagating the available rooms a client can join and (2) responding to the actions a clients executes by broadcasting the appropriate answer to all clients in the same room when jamming. The core components of Collabjam-Server are [express.js](https://expressjs.com) and the [*ws* websocket implementation](https://github.com/websockets/ws?tab=readme-ov-file).  
+
+Upon receiving a http request from a client, server and client negotiate the websocket connection[^2].
+
+The server shares the available rooms based on requests from a client.
+
+It is also responsible for broadcasting jamming inputs and control commands from one client to all in the room.
+Additionally, the server tracks the recording time of a room and ends it after a specific amount of time, that can be configured in the json definition of the room.
+
+```mermaid
+sequenceDiagram
+    participant s as Server
+    participant c1 as Client 1
+    participant c2 as Client n
+
+    c1->>s: SEND_INSTRUCTION_SERV
+    s->>s: processInstructionsFromClient()
+    par Broadcast
+      s->>c1: SEND_INSTRUCTION_CLI
+    and 
+      s->>c2: SEND_INSTRUCTION_CLI
+    end
+```
+
+- describe the reaction to an request within a room
+
+[^2]:<https://sookocheff.com/post/networking/how-do-websockets-work/>
 
 ### Data Structures
 
@@ -14,7 +37,7 @@
 ## Client (TODO)
 
 <!-- ### Application Information -->
-The Collabjam-Client is an Electron application and requires basic knowledge about:
+The Collabjam-Client is an Electron application and development requires basic knowledge about:
 
 - Typescript
 - Electron
@@ -23,7 +46,6 @@ The Collabjam-Client is an Electron application and requires basic knowledge abo
   - Vuetify Library
 - Node.js
 - Bluetooth Low Energy
-
 
 ```mermaid
 %% Flowchart describing the basic information flow structure of CollabJam
@@ -39,8 +61,8 @@ flowchart LR
 
 ### Electron
 
-The client is split in two parts: frontend and backend. The frontend contains components that, outside of Electron, would run in a browser, the backend includes the parts that would run on a remote server.
-On top of being an Electron app, Collabjam-Client is build with [Vue.js](https://vuejs.org). Therefore, for building the electron app [Vue CLI Plugin Electron Builder](https://nklayman.github.io/vue-cli-plugin-electron-builder/) is used, instead of the vanilla [Electron builder](https://www.electron.build).
+The client is split into frontend(renderer process) and backend(main process). The frontend contains components that, outside of Electron, would run in the browser, the backend includes the parts that would run on the webserver.
+In addition to being an Electron app, Collabjam-Client is build with [Vue.js](https://vuejs.org). [Vue CLI Plugin Electron Builder](https://nklayman.github.io/vue-cli-plugin-electron-builder/) is used to build the app, instead of the vanilla [Electron builder](https://www.electron.build).
 
 Relevant Files for working with the Vue+Electron structure are:
 | File          | Purpose                                                                                                    |
@@ -50,9 +72,9 @@ Relevant Files for working with the Vue+Electron structure are:
 | background.ts | The file where the application window gets configured(resolution, title, ...) and instantiated             |
 | preload.js    | Defines which functions are exposed between renderer and main process (see IPC, further reading)           |
 
-#### IPC 
+#### IPC
 
-To communicate between frontend/renderer and backend/os level components,elctron offers inter-process communication[^1]
+To communicate between frontend/renderer and backend/os level components, Electron uses inter-process communication. [^1]
 
 [^1]:<https://www.electronjs.org/docs/latest/tutorial/ipc>)
 
@@ -73,16 +95,24 @@ R ---> |"ipcMain.on() -- window.api.send()"| M
 
 ##### Messages
 
-- Strings define the different message types in IPC. The messages for the Collabjam-Client are define in the `[core/IPC/IpcChannels.ts]` file
+- Strings define the different message types in IPC. The messages for the Collabjam-Client are defined in the `[core/IPC/IpcChannels.ts]` file
 - (⚠️WIP) The messages are structured in the `function.target.message` scheme
   - e.g. `bluetooth.main.writeAmplitudeBuffer` is a message coming from the renderer process targeting to the bluetooth functionality of the main process
-  - e.g. `bluetooth.renderer.connectedToDevice` is a message from the main process, informing the renderer process about a newly connetec device
+  - e.g. `bluetooth.renderer.connectedToDevice` is a message from the main process, informing the renderer process about a newly connected device
 
 ### Folder Structure
 
-- Multiple categroies, ordered by level of fundamentality
-  - App: Infrastructure of the application like Routing, Sidebar, Root View
-  - Core: Base functionality of the CollabJam application like IPC, BLE Connection, Basic Tactile Display API
+- The folder structure of collabjam-client groups the code into features and groups them into three categories:  
+  - **App** contains the infrastructure components of the application:
+    - Routing
+    - Vue Store
+    - The fundamental Vue Views defining the always available UI  
+      - **Root View** All other views are injected into the root view
+      - Sidebar
+  - **Core** is made up of the base functionality of the CollabJam client application
+    - IPC
+    - Managing BLE Connections
+    - A basic API for tactile displays
   - ⚠️ Features: Views and functions based on top of the core features
 
 - Each (sub)category is a folder
@@ -116,7 +146,7 @@ In Collabjam-Client basic bluetooth functionality is implemented in `core/Ble/ma
 
 #### Tactile Display API
 
-On top of the `core/Ble` stack, `core/TactileDisplays/main/TactileDisplayCharacteristicWriter` exposes  functions to interface with the tactile dislay on a application level. Currently, the amplitude and the frequency of an tactile display can be changed.
+On top of the `core/Ble` stack, `core/TactileDisplays/main/TactileDisplayCharacteristicWriter` exposes  functions to interface with the tactile dislay on a application level. Currently, the amplitude and the frequency of a tactile display can be changed.
 
 ```Typescript
 // TactileDisplayCharacteristicWriter.ts

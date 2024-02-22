@@ -1,6 +1,10 @@
 # CollabJam
 
-base repo used to organize collaboration across hardware and software development.
+TODO: CollabJam is a...
+
+Meta-repository listing all development repositories of the CollabJam project.
+
+
 
 | Repository     | Description                                                                                  |
 | -------- | -------------------------------------------------------------------------------------------- |
