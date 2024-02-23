@@ -1,11 +1,39 @@
 
 ## Server (TODO)
 
-The Collabjam-Server is a NodeJS application that communicates with Collabjam-Clients through websocket connections. It has two responsibilities, (1) Propagating the available rooms a client can join and (2) responding to the actions a clients executes by broadcasting the appropriate answer to all clients in the same room when jamming. The core components of Collabjam-Server are [express.js](https://expressjs.com) and the [*ws* websocket implementation](https://github.com/websockets/ws?tab=readme-ov-file).  
+The Collabjam-Server is a NodeJS application that communicates with Collabjam-Clients through websocket connections. It has three responsibilities: (1) Propagating the available rooms a client can join, (2) responding to the actions a client executes when jamming  by broadcasting the appropriate answer to all clients in the same room and (3) recording and sharing tactons based on the previously mentioned jamming. The most important  components of Collabjam-Server are [express.js](https://expressjs.com) and the [*ws* websocket implementation](https://github.com/websockets/ws?tab=readme-ov-file).  
 
-Upon receiving a http request from a client, server and client negotiate the websocket connection[^2].
+- Server to multiple clients communication
+
+### Connecting
+
+Upon receiving a http request from a client, server and client upgrade to a websocket connection[^2].
 
 The server shares the available rooms based on requests from a client.
+
+```mermaid
+sequenceDiagram
+    participant s as Server
+    participant c1 as Client 1
+    participant c2 as Client n
+    actor u1 as User
+    u1->>c1: Request available Rooms
+    c1->>s: GET_AVAILABLE_ROOMS_SERV
+    s->>c1: GET_AVAILABLE_ROOMS_CLI
+    u1->>c1: User chooses room
+    c1->>s: ENTER_ROOM_SERV
+    Note left of s: Server creates tacton recording<br>if the user is the first in the room
+    s->>s: enterUserInRoom()
+    s->>c1: ENTER_ROOM_CLI
+    par Broadcast updated room information to all clients
+      s->>c1: UPDATE_ROOM_CLI
+    and 
+      s->>c2: UPDATE_ROOM_CLI
+    end
+
+```
+
+### Jamming
 
 It is also responsible for broadcasting jamming inputs and control commands from one client to all in the room.
 Additionally, the server tracks the recording time of a room and ends it after a specific amount of time, that can be configured in the json definition of the room.
@@ -16,23 +44,95 @@ sequenceDiagram
     participant c1 as Client 1
     participant c2 as Client n
 
+    Note left of s: Processing on client side<br>omitted in this<br>sequence diagram
+    actor u1 as User 1
+    actor u2 as User 2
+    u1->>c1: Presses button on gamepad
     c1->>s: SEND_INSTRUCTION_SERV
     s->>s: processInstructionsFromClient()
     par Broadcast
       s->>c1: SEND_INSTRUCTION_CLI
+      c1->>u1: Vibration output
     and 
       s->>c2: SEND_INSTRUCTION_CLI
+      c2->>u2: Vibration output
     end
 ```
 
-- describe the reaction to an request within a room
 
-[^2]:<https://sookocheff.com/post/networking/how-do-websockets-work/>
+
+
+
+[^2]:Learn how websocket connection are established: <https://sookocheff.com/post/networking/how-do-websockets-work/>>
+
+️#### Playing back recorded tactons
 
 ### Data Structures
 
-- Room Configuration
-- Tacton JSON
+#### Room Configuration
+
+- Rooms are preconfigured at the moment, to add or remove a room, edit `src/util/DefaultRooms.ts` file, where an array of rooms is stored.
+- After that the server has to be built again
+
+```typescript
+{
+  currentRecordingTime: 0,
+  participants: [],
+  description: "",
+  id: "9cbb9a45-b03c-4693-bf05-9cd47806ebca", // EDIT: Insert a new uuid v4 here
+  maxDurationRecord: 20000, //EDIT:  The maximal length a of tacton for this room in milliseconds 
+  mode: InteractionMode.Jamming,
+  name: "Amsterdam", //EDIT: The name that will be used in the UI 
+  recordingNamePrefix: "amsterdam" //EDIT: Prefix for the tactons stored as json files
+}
+```
+
+#### Tacton JSON
+⚠️
+The recordings created are stored on a per room basis inside folders as json files under `userData/<uuid>/<recordingNamePrefix.json>`. It includes metadata and the tacton data.
+The tacton-format is a set of `setParameter` and `wait`instructions. [^3]
+A `setParameter` instruction is instantly executed and changes the amplitude (later the frequency as well ) of one or more actuators.
+The `wait` instructions specifies an amount of time of milliseconds before the next instruction will be executed.
+This structure leads to a chain of `setParameter` and `wait` instructions.
+
+```json
+{
+	"uuid":"183e6707-21ee-44e6-af19-ab3fd836a714",
+	"metadata":{
+		"name":"eindhoven-3",
+		"favorite":false,
+		"recordDate":"2023-06-22T12:30:25.131Z"},
+    "instructions":[
+		{"setParameter":{"channelIds":[0],"intensity":0.6}},
+		{"wait":{"miliseconds":80}},
+		{"setParameter":{"channelIds":[1],"intensity":0.6}},
+		{"wait":{"miliseconds":84}},
+		{"setParameter":{"channelIds":[2],"intensity":0.6}},
+		{"wait":{"miliseconds":55}},
+		{"setParameter":{"channelIds":[0],"intensity":0}},
+		{"wait":{"miliseconds":20}},
+		{"setParameter":{"channelIds":[1],"intensity":0}},
+		{"wait":{"miliseconds":101}},
+		{"setParameter":{"channelIds":[0,1],"intensity":0.6}},
+		{"setParameter":{"channelIds":[2],"intensity":0}},
+		{"wait":{"miliseconds":100}},
+		{"setParameter":{"channelIds":[2],"intensity":0.6}},
+		{"wait":{"miliseconds":29}},
+		{"setParameter":{"channelIds":[0],"intensity":0}},
+		{"wait":{"miliseconds":16}},
+		{"setParameter":{"channelIds":[1],"intensity":0}},
+		{"wait":{"miliseconds":54}},
+		{"setParameter":{"channelIds":[0,1],"intensity":0.6}},
+		{"wait":{"miliseconds":141}},
+		{"setParameter":{"channelIds":[0,2,1],"intensity":0}},
+		{"setParameter":{"intensity":0,"channelIds":[0,1,2]}}
+	]
+}
+```
+
+
+[^3]: The format is basically a subset of the vtproto protocol buffer implementation devleoped by lhinderberger. See `doc/vtproto.proto`
+
 
 ## Client (TODO)
 

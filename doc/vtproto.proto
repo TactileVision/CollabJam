@@ -1,0 +1,82 @@
+/*
+ * This file, in its original form, was created by Lucas Hinderberger
+ *
+ * To the extend possible under law, Lucas Hinderberger has waived all copyright
+ * and related or neighboring rights to this file, as described in
+ * CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/).
+ * This work is published from Germany.
+ */
+syntax = "proto3";
+import "nanopb.proto";
+
+enum WaveformType {
+    SINE = 0;
+    SQUARE = 1;
+    TRIANGLE = 2;
+    SAWTOOTH = 3;
+}
+
+message FileHeader {
+    uint32 format_version = 1; // Fixed value for this draft of vtproto: 0
+    string pattern_name = 2;
+    string author = 3;
+    uint32 duration_ms = 4;
+    uint32 n_instructions = 5;
+    uint32 n_channels = 6;
+    map<string,string> custom_headers = 7;
+}
+
+message Instruction {
+    option (nanopb_msgopt).submsg_callback = true;
+	
+    oneof concrete_instruction {
+        InstAddToGroup add_channels_to_group = 1;
+        InstAddToGroup add_groups_to_group = 2;
+        InstWait wait = 3;
+        InstSetWaveformType set_waveform_type = 4;
+        InstInstantlySetParameter set_parameter = 5;
+        InstInterpolateParameter interpolate_parameter = 6;
+    }
+}
+
+message InstAddToGroup {
+    uint32 group_id = 1;
+    repeated uint32 ids_to_be_added = 2;
+}
+
+message InstInstantlySetParameter {
+    oneof target_id {
+        uint32 channel_id = 1;
+        uint32 group_id = 2;
+    }
+    oneof parameter {
+        float intensity = 3;
+        uint32 frequency_hz = 4;
+    }
+}
+
+message InstInterpolateParameter {
+    oneof target_id {
+        uint32 channel_id = 1;
+        uint32 group_id = 2;
+    }
+
+    uint32 duration_ms = 3;
+
+    oneof parameter {
+        float intensity = 4; // Range 0-1
+        uint32 frequency_hz = 5;
+    }
+}
+
+message InstSetWaveformType {
+    oneof target_id {
+        uint32 channel_id = 1;
+        uint32 group_id = 2;
+    }
+    WaveformType waveform_type = 3;
+}
+
+message InstWait {
+    uint32 milliseconds = 1;
+}
