@@ -2,6 +2,8 @@
 
 This repository serves as the central hub for all resources related to the research project ”CollabJam” published at the CHI Conference 2025. This meta-repo provides an overview and links to individual repositories for the client app, firmware, hardware, and data visualization tools.
 
+![teaser-github](https://github.com/user-attachments/assets/f344ebe9-5038-4354-bb8e-5102e8a7d93d)
+
 ## Repositories
 
 Below are links to the individual repositories associated with the project:
