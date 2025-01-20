@@ -27,7 +27,8 @@ If you use this project in your research, please cite it as follows:
     address = {New York, NY, USA},
     booktitle = {Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems},
     location = {Yokohama, Japan},
-    series = {CHI '25}
+    series = {CHI '25},
+    doi = {10.1145/3706598.3713469}
 }
 ```
 
