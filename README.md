@@ -10,7 +10,7 @@ Below are links to the individual repositories associated with the project:
 
 - 🖥️ [Client App Repository](https://github.com/TactileVision/CollabJam-Client) - The main client application used for interacting with and designing vibrotactile experiences collaboratively.
 - ⚙️ [Server Repository](https://github.com/TactileVision/CollabJam-Server) - The server application used for collaborative designing, shared rendering of vibrotactile patterns, and storing patterns in a database.
-- ⚙️ [Share Components Repository](https://github.com/TactileVision/CollabJam-Shared) - Components which are shared across the client and client applications.
+- ⚙️ [Share Components Repository](https://github.com/TactileVision/CollabJam-Shared) - Components which are shared across the server and client application.
 - ⚙️ [Firmware Repository](https://github.com/TactileVision/CollabJam-Firmware) - Contains the firmware code for the tactile display used in the project.
 - 🕹️ [Hardware Repository](https://github.com/TactileVision/CollabJam-PCB) - Detailed schematics and designs for the tactile display.
 - 📈 [Data Visualization Repository](https://github.com/TactileVision/CollabJam-Tacton-Table-Tool) - Tool for visualizing vibrotactile patterns collected during the study sessions.
