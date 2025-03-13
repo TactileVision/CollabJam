@@ -13,6 +13,7 @@ Below are links to the individual repositories associated with the project:
 - ⚙️ [Share Components Repository](https://github.com/TactileVision/CollabJam-Shared) - Components which are shared across the server and client application.
 - ⚙️ [Firmware Repository](https://github.com/TactileVision/CollabJam-Firmware) - Contains the firmware code for the tactile display used in the project.
 - 🕹️ [Hardware Repository](https://github.com/TactileVision/CollabJam-PCB) - Detailed schematics and designs for the tactile display.
+- 🕹️ [Harness Repository](https://github.com/TactileVision/CollabJam-Harness) - CAD files and print files for the harness.
 - 📈 [Data Visualization Repository](https://github.com/TactileVision/CollabJam-Tacton-Table-Tool) - Tool for visualizing vibrotactile patterns collected during the study sessions.
 
 
